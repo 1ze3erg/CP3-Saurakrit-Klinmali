@@ -1,0 +1,6 @@
+distance = float(input("ระยะทาง(หน่วยกิโลเมตร): "))
+timeHour = int(input("เวลาที่ใช้(หน่วยชั่วโมง): "))
+timeMin = int(input("เวลาที่ใช้(หน่วยนาที): "))
+timeSec = int(input("เวลาที่ใช้(หน่วยวินาที): "))
+velocity = distance/(timeHour+timeMin/60+timeSec/3600)
+print("ความเร็ว = ", velocity, "km/hr")
