@@ -2,34 +2,56 @@ from tkinter import *
 from tkinter import ttk
 from forex_python.converter import *
 import tkinter as tk
+from tkcalendar import *
 
 cur_rate = CurrencyRates()
 
 
-def convert_currency(event):
+def convert_currency():
     # รับสกุลเงินมาจากการพิมพ์แล้วแปลงเป็นตัวพิมพ์ใหญ่
     cur1_cal = str(cur1_entry.get()).upper()
     cur2_cal = str(cur2_entry.get()).upper()
+    date_obj = calendar.selection_get()
 
+    radio_value_get()
+    
     # เช็คว่ามีการใส่าจำนวนเงินที่ช่องไหนและใส่ผลลัพธ์ของการแปลงในอีกช่อง
     if money1_entry.get() != "":
         money_cal = float(money1_entry.get())
-        result = cur_rate.convert(cur1_cal, cur2_cal, money_cal)
+        result = cur_rate.convert(cur1_cal, cur2_cal, money_cal, date_obj)
         money2_entry.insert(0, result)
     else:
         money_cal = float(money2_entry.get())
-        result = cur_rate.convert(cur2_cal, cur1_cal, money_cal)
+        result = cur_rate.convert(cur2_cal, cur1_cal, money_cal, date_obj)
         money1_entry.insert(0, result)
+        
+    grab_date()
 
 
-def clear_money(event):
+def radio_value_get():
+    if var.get() == 1:
+        money1_entry.delete(0, 'end')
+    elif var.get() == 2:
+        money2_entry.delete(0, 'end') 
+
+    
+def clear_money():
     money1_entry.delete(0, 'end')
     money2_entry.delete(0, 'end')
 
 
+def grab_date():
+    calendar_label.config(text=calendar.selection_get())
+    
+
+def clear_date():
+    calendar.selection_clear()
+    calendar_label.configure(text="")
+
+
 main_windows = tk.Tk()
 main_windows.title("โปรแกรมแปลงค่าเงิน")
-main_windows.geometry('300x500')
+main_windows.geometry('300x700')
 
 
 # money1
@@ -79,10 +101,14 @@ cur1_entry = ttk.Combobox(main_windows,
 cur1_entry.pack(expand=True)
 
 
-# ลูกศรขึ้นลงเป็นสัญลักษณ์เพื่อแสดงว่าสามารถแปลงค่าเงินไปมาได้
-filename = PhotoImage(file="sorting-arrows.png").subsample(x=10, y=10)
-arrow = Label(main_windows, image=filename)
-arrow.pack(expand=True)
+# ให้เลือกว่าจะแปลงขึ้นหรือลง
+var = IntVar()
+filename1 = PhotoImage(file='arrow-up.png').subsample(x=70, y=70)
+filename2 = PhotoImage(file='arrow-down.png').subsample(x=70, y=70)
+R1 = Radiobutton(main_windows, variable=var, value=1, image=filename1)
+R1.pack()
+R2 = Radiobutton(main_windows, variable=var, value=2, image=filename2)
+R2.pack()
 
 
 # money2
@@ -133,15 +159,24 @@ cur2_entry.pack(expand=True)
 
 
 # ปุ่มคำนวณ
-convert_button = Button(main_windows, text="แปลงค่าเงิน", width=20, bg="grey")
-convert_button.bind('<Button-1>', convert_currency)
+convert_button = Button(main_windows, text="แปลงค่าเงิน",
+                        width=20, bg="grey", command=convert_currency)
 convert_button.pack(fill=tk.Y, expand=True)
 
 
 # ปุ่ม clear จำนวนเงิน
-clear_button = Button(main_windows, text="clear money", width=20, bg="red")
-clear_button.bind('<Button-1>', clear_money)
-clear_button.pack(fill=tk.Y, expand=True)
+clear_button = Button(main_windows, text="clear money",
+                      width=20, bg="red", command=clear_money)
+clear_button.pack(fill=tk.Y, expand=True, pady=5)
 
+# calendar
+calendar_date_pattern = tk.Label(main_windows, text="Date(y-mm-dd)", bg='cyan')
+calendar_date_pattern.pack(fill=BOTH, expand=True)
+calendar_label = tk.Label(main_windows, text="", bg='cyan')
+calendar_label.pack(fill=tk.Y, expand=True)
+calendar_clear_date = tk.Button(main_windows, text="Clear Date", command=clear_date)
+calendar_clear_date.pack(expand=True, pady=5)
+calendar = Calendar(main_windows, selectmode="day", date_pattern='y-mm-dd')
+calendar.pack(side=RIGHT, expand=True, pady=5)
 
 main_windows.mainloop()
