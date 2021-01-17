@@ -3,10 +3,11 @@ from tkinter import ttk
 from forex_python.converter import *
 import tkinter as tk
 from tkcalendar import *
+import datetime
 
 cur_rate = CurrencyRates()
 
-
+# แปลงค่าเงิน
 def convert_currency():
     # รับสกุลเงินมาจากการพิมพ์แล้วแปลงเป็นตัวพิมพ์ใหญ่
     cur1_cal = str(cur1_entry.get()).upper()
@@ -14,7 +15,7 @@ def convert_currency():
     date_obj = calendar.selection_get()
 
     radio_value_get()
-    
+
     # เช็คว่ามีการใส่าจำนวนเงินที่ช่องไหนและใส่ผลลัพธ์ของการแปลงในอีกช่อง
     if money1_entry.get() != "":
         money_cal = float(money1_entry.get())
@@ -24,26 +25,36 @@ def convert_currency():
         money_cal = float(money2_entry.get())
         result = cur_rate.convert(cur2_cal, cur1_cal, money_cal, date_obj)
         money1_entry.insert(0, result)
-        
+
     grab_date()
 
 
+# รับค่าจาก radio button
 def radio_value_get():
     if var.get() == 1:
         money1_entry.delete(0, 'end')
     elif var.get() == 2:
-        money2_entry.delete(0, 'end') 
+        money2_entry.delete(0, 'end')
+    else:
+        money1_entry.delete(0, 'end')
+        money2_entry.delete(0, 'end')
 
-    
+
+# clear ช่องที่ใส่ค่าเงิน
 def clear_money():
     money1_entry.delete(0, 'end')
     money2_entry.delete(0, 'end')
 
 
+# แสดงวันที่
 def grab_date():
-    calendar_label.config(text=calendar.selection_get())
-    
+    if calendar.selection_get() != None:
+        calendar_label.config(text=calendar.selection_get())
+    else:
+        calendar_label.config(text=datetime.date.today())
 
+
+# clear วันที่
 def clear_date():
     calendar.selection_clear()
     calendar_label.configure(text="")
@@ -169,14 +180,21 @@ clear_button = Button(main_windows, text="clear money",
                       width=20, bg="red", command=clear_money)
 clear_button.pack(fill=tk.Y, expand=True, pady=5)
 
-# calendar
+# ช่องแสดงวันที่และปุ่มclearวันที่
 calendar_date_pattern = tk.Label(main_windows, text="Date(y-mm-dd)", bg='cyan')
 calendar_date_pattern.pack(fill=BOTH, expand=True)
 calendar_label = tk.Label(main_windows, text="", bg='cyan')
 calendar_label.pack(fill=tk.Y, expand=True)
-calendar_clear_date = tk.Button(main_windows, text="Clear Date", command=clear_date)
+calendar_clear_date = tk.Button(
+    main_windows, text="Clear Date", command=clear_date)
 calendar_clear_date.pack(expand=True, pady=5)
-calendar = Calendar(main_windows, selectmode="day", date_pattern='y-mm-dd')
+
+# ช่อง calendar หลัก
+mindate = datetime.date(year=1999, month=1, day=10)
+maxdate = datetime.date.today()
+calendar = Calendar(main_windows, selectmode="day", date_pattern='y-mm-dd',
+                    firstweekday='sunday', disableddaybackground='grey', cursor="hand2",
+                    mindate=mindate, maxdate=maxdate)
 calendar.pack(side=RIGHT, expand=True, pady=5)
 
 main_windows.mainloop()
